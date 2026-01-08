@@ -19,7 +19,14 @@ function App() {
   const [links, setLinks] = useState([]);
   const [error, setError] = useState(""); // handles all cases where img is too big or the wrong file type
 
-
+  //Helper markdown img//
+  const fileToDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });  
 
   const updateFields = (event) => {
     const { name, value} = event.target;
@@ -57,7 +64,7 @@ function App() {
   const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
   const maxFileSizeMB = 5; // Max 5MB
     
-    const handleStepImageChange = (index, e) => {
+    const handleStepImageChange = async (index, e) => {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
 
@@ -83,7 +90,7 @@ function App() {
     }
 
       setError("");
-      const urls = files.map((f) => URL.createObjectURL(f))
+      const urls = await Promise.all(files.map(fileToDataUrl));
 
       setSteps(prev =>
         prev.map((step, i) =>
@@ -155,47 +162,71 @@ function App() {
       // Code below builds a chunk of HTML that contains the steps + real <img> tags, so when you copy it, apps like Google Docs paste the actual images, not Markdown text (bc
       // markdown cannot cary image bits, but HTML can)
       const html = useMemo(() => {
-        const esc = (s = "") => // Escapes user text so it can’t break HTML
-          s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        const esc = (s = "") =>
+          s
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
 
         const title = sopFields.title?.trim() || "Untitled SOP";
 
-        
-        // ${esc(title)}: Builds a string of real HTML for clipboard copy (images included). Then it Keep steps that have text OR an image. Then every step becomes a <li> and text
-        // goes inside a <div>. ${s.image ? `<div><img src="${s.image}" -> this embeds image. .join("") combines all <li> blocks into one string and returns an array (required bc
-        // .map() returns an array)
+        const p = sopFields.purpose?.trim();
+        const sc = sopFields.scope?.trim();
+        const o = sopFields.owner?.trim();
+        const f = sopFields.frequency?.trim();
+
         return `
-          <h1>${esc(title)}</h1> 
+          <h1>${esc(title)}</h1>
+
+          ${(p || sc || o || f) ? `
+            <div class="meta">
+              ${p ? `<div class="meta-row"><strong>Purpose:</strong><div>${esc(p)}</div></div>` : ""}
+              ${sc ? `<div class="meta-row"><strong>Scope:</strong><div>${esc(sc)}</div></div>` : ""}
+              ${o ? `<div class="meta-row"><strong>Owner:</strong><div>${esc(o)}</div></div>` : ""}
+              ${f ? `<div class="meta-row"><strong>Frequency:</strong><div>${esc(f)}</div></div>` : ""}
+            </div>
+          ` : ""}
+
           <ol>
             ${steps
               .filter((s) => s.text.trim() || (s.images && s.images.length))
-              .map(
-                (s) => `
-                <li>
-                  <div>${esc(s.text)}</div>
-                      ${(s.images || [])
-                      .map((src) => `<div><img src="${src}" style="max-width:420px;height:auto;" /></div>`)
-                      .join("")}
-                </li>`
-              )
+              .map((s) => `
+                <li class="step">
+                  <div class="step-text">${esc(s.text)}</div>
+                  ${(s.images || [])
+                    .map((src) => `
+                      <div class="img-wrap">
+                        <img class="sop-img" src="${src}" alt="Step image" />
+                      </div>
+                    `)
+                    .join("")}
+                </li>
+              `)
               .join("")}
           </ol>
         `;
-      }, [sopFields.title, steps]);
+      }, [sopFields, steps]);
+
 
 
     // Copy HTML = plain text fallback (if the code above fails)
       const handleCopy = async () => {
+        try {
     // must be HTTPS / localhost (secure context)
         const item = new ClipboardItem ({
           "text/html" : new Blob([html], { type: "text/html" }), //text/html is MIME type syntax
           "text/plain": new Blob([markdown], { type: "text/plain" }), // fallback
         });
 
+        await navigator.clipboard.write([item]);
+        alert("Copied to clipboard!");
+      } catch (err) {
     // Write the ClipboardItem to the system clipboard.
     // `await` is used because clipboard writes are asynchronous
     // and may take time due to browser security checks.
-        await navigator.clipboard.write([item]);
+        await navigator.clipboard.writeText(markdown);
+        alert ("Could not copy rich content. Copied plain text instead.");
+      }
   };
 
 
@@ -220,27 +251,62 @@ function App() {
           return;
         }
 
-        w.document.open();
-        w.document.write(`
-              <!doctype html>
-                <html>
-                  <head>
-                    <meta charset="utf-8" />
-                    <title>SOP Export</title>
-                    <style>
-                      body { font-family: Red Rose, DM Sans; padding: 24px; }
-                      img { max-width: 600px; height: auto; display: block; margin: 8px 0; }
-                      h1 { margin-bottom: 12px; }
-                      ol { padding-left: 20px; }
-                      li { margin-bottom: 14px; }
-                    </style>
-                  </head>
-                  <body>
-                    ${html}
-                  </body>
-                </html>
-              `);
-        w.document.close();
+    w.document.open();
+    w.document.write(`
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>SOP Export</title>
+      <style>
+        @page { margin: 18mm 14mm; }
+        html, body { background: #fff; }
+
+        body {
+          font-family: system-ui, -apple-system, "DM Sans", Segoe UI, Roboto, Arial, sans-serif;
+          color: #111827;
+          font-size: 10.5pt;
+          line-height: 1.45;
+          margin: 0;
+        }
+
+        h1 { font-size: 16pt; margin: 0 0 10px; }
+
+        .meta {
+          margin: 10px 0 14px;
+          padding: 10px 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
+        }
+
+        ol { margin: 0; padding-left: 18px; }
+        li { margin: 0 0 12px; break-inside: avoid; }
+
+        .step-text { white-space: pre-wrap; margin: 0 0 6px; }
+
+        .img-wrap { margin: 8px 0; }
+
+        /* Uniform image boxes in PDF */
+        .sop-img {
+          width: 260px !important;
+          height: 200px !important;
+          object-fit: contain !important;
+          display: block;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          background: #fff;
+        }
+      </style>
+
+      </head>
+
+      <body>
+        ${html}
+      </body>
+    </html>
+    `);
+    w.document.close();
+
       
 
         // wait for images to load, then print
@@ -405,11 +471,10 @@ function App() {
             Open Google Docs
           </a>
 
-          <div>  
-            <pre className="output">
-              {markdown}
-            </pre>
-          </div>
+          <div
+            className="output"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
         </div>  
       </div>
     </div>

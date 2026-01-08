@@ -130,13 +130,19 @@ html, body {
   height: 100%;             
 } */
 
-.right-column .output {
-  height: 100%;            
+.right-column .preview {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 110px); /* adjust if needed */
 }
 
 .output {
-  flex: 1; 
-  overflow: auto;      
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #dde3f0;
+  border-radius: 10px;
+  padding: 12px;
 }
 
 .middle-column,
@@ -179,4 +185,16 @@ button:hover {
 .step-image-upload {
   margin-bottom: 12px;
 }
+
+img {
+  width: 220px;          /* all images same visual width */
+  max-height: 180px;     /* cap height so tall images don’t explode */
+  object-fit: contain;  /* keep full image, no cropping */
+  display: block;
+  margin: 8px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;     /* nice if image is smaller than box */
+}
+
 
