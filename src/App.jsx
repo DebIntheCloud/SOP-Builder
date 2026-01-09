@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import './App.css'
 import sop from "./assets/images/sop.png"
+import stepsIcon from "./assets/images/steps.png"
+import linkIcon from "./assets/images/linkIcon.png"
+import logo from "./assets/images/logo.png"
 
 
 function App() {
@@ -99,6 +102,21 @@ function App() {
       );
     };
 
+    const removeStepImage = (stepIndex, imageIndex) => { //Defines a function that knows which step and which image inside that step you want to remove.
+      setSteps((prev) => //Updates the steps state using the previous value (safe React pattern).
+        prev.map((step, i) => { //Loops over every step in the steps array.
+          if (i !== stepIndex) return step; //If this is not the step we’re editing, return it unchanged.
+
+          const nextImages = (step.images || []).filter((_, idx) => idx !== imageIndex); //Creates a new images array by removing the image at imageIndex.
+
+          return {
+            ...step, //Copy everything that already exists in the step (text, etc.)
+            images: nextImages, //Replace the images array with the filtered one (image removed).
+            fileKey: Date.now(), // Forces the file input to reset so the user can re-upload the same file if needed.
+          };
+        })
+      );
+    };
 
    
   const updateLinks = (index, event) => {
@@ -284,18 +302,17 @@ function App() {
 
         .step-text { white-space: pre-wrap; margin: 0 0 6px; }
 
-        .img-wrap { margin: 8px 0; }
-
-        /* Uniform image boxes in PDF */
+        img { max-width: none !important; }
         .sop-img {
           width: 260px !important;
           height: 200px !important;
           object-fit: contain !important;
-          display: block;
+          display: block !important;
           border: 1px solid #e5e7eb;
           border-radius: 8px;
           background: #fff;
         }
+
       </style>
 
       </head>
@@ -342,51 +359,61 @@ function App() {
         <div className='left-column'>
         </div>
         
-        <div className="top-bar" />
-
-        <div className='middle-column'>
-
+      <div className="top-bar">
+        <div className="top-bar-content">
+          <img className="top-bar-logo" src={logo} alt="logo" />
+          <span className="top-bar-text">Welcome to Systemic Formula's Workspace</span>
+        </div>
+      </div>
+      
+        <div className='middle-column'>  
           <div className="card sop-info-section">
-            <h2 className='card-title'>
-            <img className='card-icon' src={sop} alt="SOP"/>
-            SOP Details
-            </h2>          
-            <div className="form">
-              <label>Title</label>
-              <input
-                name = "title"
-                value = {sopFields.title}
-                onChange = {updateFields}
+            <div className="card-inner">
+              <h2 className='card-title'>
+                <img className='card-icon' src={sop} alt="SOP"/>
+                SOP Details
+              </h2>          
+            
+              <div className="form">
+                <label>Title</label>
+               <input
+                  name = "title"
+                  value = {sopFields.title}
+                  onChange = {updateFields}
               />
-              <label>Purpose</label>
-              <textarea
-                name = "purpose"
-                value = {sopFields.purpose}
-                onChange={updateFields}
+                <label>Purpose</label>
+                <textarea
+                  name = "purpose"
+                  value = {sopFields.purpose}
+                  onChange={updateFields}
               />
-              <label>Scope</label>
-              <textarea
-                name = "scope"
-                value = {sopFields.scope}
-                onChange={updateFields}
+                <label>Scope</label>
+                <textarea
+                  name = "scope"
+                  value = {sopFields.scope}
+                  onChange={updateFields}
               />
-              <label>Owner</label>
-              <input
-                name = "owner"
-                value = {sopFields.owner}
-                onChange={updateFields}
+                <label>Owner</label>
+                <input
+                  name = "owner"
+                  value = {sopFields.owner}
+                  onChange={updateFields}
               />
-              <label>Frequency</label>
-              <input
-                name = "frequency"
-                value = {sopFields.frequency}
-                onChange={updateFields}
-              />
+                <label>Frequency</label>
+                <input
+                  name = "frequency"
+                  value = {sopFields.frequency}
+                  onChange={updateFields}
+                />
+              </div>
             </div> 
           </div>
 
           <div className="card steps-section">
-            <h2>Steps</h2>
+            <h2 className= "card-title">
+                <img className='card-icon' src={stepsIcon} alt="steps"/>
+                Steps
+            </h2> 
 
             <button type="button" onClick={addStep}>Add Step</button>
 
@@ -413,14 +440,35 @@ function App() {
                   {/*Img preview */}  
                   {step.images?.length > 0 && (
                     <div style={{ display: "grid", gap: "8px", marginTop: "8px" }}>
-                      {step.images.map((src, idx) => (
-                        <img
-                          key={idx}
-                          src={src}
-                          alt={`Step ${i + 1} image ${idx + 1}`}
-                          style={{ maxWidth: "200px" }}
-                        />
-                      ))}
+                  {step.images.map((src, idx) => (
+                    <div key={idx} style={{ position: "relative", display: "inline-block" }}>
+                      <img
+                        src={src}
+                        alt={`Step ${i + 1} image ${idx + 1}`}
+                        style={{ maxWidth: "200px", display: "block", borderRadius: "8px" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeStepImage(i, idx)}
+                        title="Remove image"
+                        style={{
+                          position: "absolute",
+                          top: "6px",
+                          right: "6px",
+                          padding: "2px 8px",
+                          borderRadius: "999px",
+                          border: "none",
+                          cursor: "pointer",
+                          background: "rgba(0,0,0,0.65)",
+                          color: "#fff",
+                          fontSize: "12px",
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                     </div>
                   )}
                 </div>                            
@@ -431,7 +479,9 @@ function App() {
           </div>
 
           <div className="card links-section">
-            <h2>Links</h2>
+            <h2 className= "card-title">
+              <img className='card-icon' src={linkIcon} alt="link"/> 
+            Links</h2>
 
             <button type="button" onClick={addLink}>Add Link</button>
 
@@ -453,7 +503,7 @@ function App() {
       </div>          {/* middle-column */}
         <div className='right-column'>
           <div className="card preview form">
-          <h2>Preview  </h2>
+          <h2 className="card-title">Preview  </h2>
           <button type="button" onClick={handleCopy}>Copy Markdown</button>  
 
           <button type="button" onClick={handleReset}>Reset</button> 
@@ -462,7 +512,7 @@ function App() {
 
             {/*target: tells the browser: open the link in a new tab (or new window)*/}
             {/*rel:nonreferrer: tells the browser: open the link in a new tab (or new window)*/}
-          <a
+          <a 
             href= "https://docs.new"
             target="_blank"
             rel="noreferrer" 

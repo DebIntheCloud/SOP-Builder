@@ -4,51 +4,84 @@
 Red Rose font in addition to the DM Sans font
 */
 
-
-body {
-  margin: 0; /*browsers give the <body> a default margin (usually 8px). If you don’t zero it out, you’ll always get a little “mystery frame”*/
-  min-height: 100vh;
-  background: #e6e9f2; /* soft grey */
-}
-
 /*make your grid actually fill the viewport and not "shrink-wrap" */
 html, body {
   height: 100%;
 }
 
+:root{
+  --bg: #e6e9f2;            /* soft grey */
+  --card: #ffffff;
+  --border: #dde3f0;
+  --text: #0f4677;
+
+  --content-width: 720px;  /* main form width */
+  --title-width: 560px;    /* section title width (Steps/Links) */
+}
+
+body {
+  margin: 0; /*browsers give the <body> a default margin (usually 8px). If you don’t zero it out, you’ll always get a little “mystery frame”*/
+  min-height: 100vh;
+  background: var(--bg);
+}
+
 /*if outer-wrapper is inside a root element, this helps it stretch */
 #root {
   width: 100%;
-  max-width: none;  
-  margin: 0;        
+  max-width: none;
+  margin: 0;
   padding: 0;
 }
 
-.outer-wrapper { 
+.outer-wrapper {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 80px 1fr 16px 560px; /* left / middle / gap / right */
-  grid-template-rows: 64px 1fr;
+  grid-template-columns: 90px 1fr 6px 600px; /* left / middle / gap / right */
+  grid-template-rows: 100px 1fr;
   gap: 0; /*spacing between the grid columns*/
   padding: 0;  /*between the grid and the browser edge*/
 }
 
+/* Left gradient rail */
 .left-column{
   grid-row: 1 / span 2; /*start at row 1 and occupy 2 rows worth of height */
   grid-column: 1;
-  
   background: linear-gradient(180deg, #417DF2 0%, #AE6023 100%); /*percentages are the positions along the gradient. 0%:at the very top and 70%:on the way down the element*/
   /* border: 1px solid rgba(0, 0, 0, 0.06); */
 }
 
+/* Top gradient bar */
 .top-bar{
   grid-column: 2 / 5;
   grid-row: 1;
-  height: 64px;
-  background: linear-gradient(90deg, #417DF2 0%, #AE6023 100%); /*percentages are the positions along the gradient. 0%:at the very top and 70%:on the way down the element*/
-  /* border: 1px solid rgba(0, 0, 0, 0.06); */
+  height: 100px;
+  background: linear-gradient(90deg, #417DF2 0%, #AE6023 100%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* right side */
+  padding: 0 24px;
 }
 
+.top-bar-content{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+  font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  height: 110px;
+}
+
+.top-bar-logo{
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+
+/* Panel shells */
 .middle-column{
   grid-row: 2; /*occupy row 2 */
   grid-column: 2;
@@ -56,59 +89,80 @@ html, body {
   padding: 24px 40px;
 }
 
-.card {
-    background: #ffffff;
-    border: 1px solid #dde3f0;
-    border-radius: 14px;
-    box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
-    padding: 24px;
-    margin-bottom: 16px; 
+.right-column{
+  grid-row: 2;
+  grid-column: 4;
+  height: 100%;
 }
 
+.middle-column,
+.right-column {
+  border-radius: 14px; /* rounds the corners*/
+  background: var(--bg);
+  border: 1px solid var(--bg); /* visible soft grey border */
+  padding: 16px;
+}
+
+/* Card base */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+/* A reusable centered content wrapper */
+.content {
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+/* Title row inside cards */
 .card-title {
   display: flex; /*Turns the <h2> into a flex container.*/
-  align-items: center; /*Vertically centers the children within the row.*/
-  gap: 10px; /*spacing between the children*/
+  align-items: flex-start;
+  gap: 12px; /*spacing between the children*/
+  font-size: 32px;
+  font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.25; /* keeps it tight, not tall*/
   margin: 0 0 12px; /*Adds space under the title row*/
+  color: var(--text);
 }
 
-.sop-info-section .card-title,
-.steps-section h2,
-.links-section h2 {
-  max-width: 560px;
-  margin: 0 auto 12px;
-  color: #0f4677
-}
-
-.steps-section > button,
-.links-section > button {
-  display: block;
-  max-width: 560px;
+/* Sections: control widths without repeating a lot */
+.sop-info-section .card-title {
+  max-width: var(--content-width);
   margin: 0 auto 12px;
 }
 
-.sop-info-section .form {
-  max-width: 720px;         
-  margin: 0 auto;            
-}
-
-.card-icon {
-  width: 28px;
-  height: 28px;
-  object-fit: contain; /*this ensures the whole image stays visible*/
-}
-
-.form {
+.steps-section .card-title,
+.links-section .card-title {
   max-width: 720px;
+  margin: 0 auto 12px;
+}
+
+/* Icon used in titles (do NOT let global image rules mess with this) */
+.card-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain; /*this ensures the whole image stays visible*/
+  flex-shrink: 0; /*prevents squishing*/
+}
+
+/* Form layout */
+.form {
+  max-width: var(--content-width);
   margin: 0 auto;   /* centers inside the card */
   display: grid;
   gap: 10px;
 }
 
 .form label {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
-  color: #0f4677
+  color: var(--text);
 }
 
 .form input,
@@ -120,81 +174,133 @@ html, body {
   font: inherit;
 }
 
-.right-column {
-  grid-row: 2;
-  grid-column: 4;
-  height: 100%;
+/* Buttons above forms (Steps/Links) */
+.steps-section > button,
+.links-section > button {
+  display: block;
+  max-width: var(--title-width);
+  margin: 0 auto 12px;
 }
 
-/* .right-column .preview {
-  height: 100%;             
-} */
+.links-section .form > div {
+  display: grid;
+  gap: 10px; /* space between input and button */
+}
 
+.links-section .form button {
+    width: fit-content;
+    justify-self: start;
+}
+
+
+.step-image-upload {
+  margin-bottom: 12px;
+}
+
+/* Preview column */
 .right-column .preview {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 110px); /* adjust if needed */
 }
 
+.right-column .preview {
+  font-family: "Red Rose, DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 16px;      /* match your form text size */
+  line-height: 1.45;
+}
+
+
 .output {
   flex: 1;
   overflow: auto;
   background: #fff;
-  border: 1px solid #dde3f0;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
 }
 
-.middle-column,
-.right-column {
-  border-radius: 14px; /* rounds the corners*/
-  background: #e6e9f2;
-  border: 1px solid #e6e9f2; /* visible soft grey border */
-  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06); /* gentle separation */
-  padding: 16px;
-}
-
-button {
+/* Buttons */
+button,
+.btn {
   background-color: #417DF2;
   color: white;
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 6px;
-  padding: 10px 14px;
+  padding: 12px 14px;
+  font-size: 18px;
   cursor: pointer;
+  font: inherit; 
 }
 
-button:hover {
+button:hover,
+.btn:hover {
   filter: brightness(0.97);
 }
 
 .btn {
   display: inline-block;
-  background-color: #417DF2;
-  color: white;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 6px;
-  padding: 10px 14px;
-  cursor: pointer;
   text-decoration: none;
 }
 
-.btn:hover {
-  filter: brightness(0.97);
+.preview .btn {
+  display: block;        /* allow margin auto to work */
+  width: 85%;
+  justify-self: center;
+  text-align: center;    /* center text inside the anchor */
 }
 
-.step-image-upload {
-  margin-bottom: 12px;
+/* Preview buttons: makes them narrower */
+.preview button,
+.preview .btn {
+  width: 85%;          /* pick: 80–92% */
+  justify-self: center; /* centers inside the grid */
+  button { text-align: center; }
 }
 
-img {
+
+/* IMPORTANT:
+Don’t style ALL images globally (it breaks icons).
+Only targets step preview images. */
+.step-image-upload img,
+.output img {
   width: 220px;          /* all images same visual width */
   max-height: 180px;     /* cap height so tall images don’t explode */
-  object-fit: contain;  /* keep full image, no cropping */
+  object-fit: contain;   /* keep full image, no cropping */
   display: block;
   margin: 8px 0;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  background: #fff;     /* nice if image is smaller than box */
+  background: #fff;
 }
 
+
+.output {
+  flex: 1;
+  overflow: auto;
+  background: #fff;
+  color: #0f4677;              /* <- was font */
+  border: 1px solid #dde3f0;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 16px;
+}
+
+
+.output h1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 32px;
+  line-height: 1.25;
+  margin: 0 0 12px;
+  color: #0f4677;
+}
+
+/*match section headings inside output (Purpose/Scope/etc if you later use h2/h3) */
+.output h2,
+.output h3 {
+  margin: 12px 0 8px;
+  color: #0f4677;
+}
 
