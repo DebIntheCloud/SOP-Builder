@@ -59,24 +59,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end; /* right side */
-  padding: 0 24px;
+  padding: 0 32px;
 }
 
 .top-bar-content{
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   color: #fff;
-  font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 28px;
+  font-family: "Red Rose", "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 34px;
   font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.18);
   letter-spacing: 0.2px;
   height: 110px;
 }
 
 .top-bar-logo{
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 
@@ -253,9 +254,9 @@ button:hover,
 /* Preview buttons: makes them narrower */
 .preview button,
 .preview .btn {
-  width: 85%;          /* pick: 80–92% */
-  justify-self: center; /* centers inside the grid */
-  button { text-align: center; }
+  width: 85%;
+  justify-self: center;
+  text-align: center;
 }
 
 
